@@ -115,24 +115,24 @@ describe('animSpeedFactor', () => {
 
 describe('statusChip', () => {
   it('fan reflects mode label and active state', () => {
-    expect(statusChip('fan', undefined, 'medium')).toEqual(
+    expect(statusChip('fan', undefined, 'medium', 'de')).toEqual(
       { icon: 'mdi:fan', label: 'Lüfter', sub: 'Stufe 2', active: true, color: '#03a9f4' },
     );
-    expect(statusChip('fan', undefined, 'off').active).toBe(false);
-    expect(statusChip('fan', undefined, 'off').sub).toBe('Aus');
-    expect(statusChip('fan', undefined, 'HIGH').sub).toBe('Stufe 3'); // case-insensitiv
+    expect(statusChip('fan', undefined, 'off', 'de').active).toBe(false);
+    expect(statusChip('fan', undefined, 'off', 'de').sub).toBe('Aus');
+    expect(statusChip('fan', undefined, 'HIGH', 'de').sub).toBe('Stufe 3'); // case-insensitiv
   });
   it('filter alerts when on', () => {
-    expect(statusChip('filter', 'on')).toMatchObject({ sub: 'Wechseln', active: true });
-    expect(statusChip('filter', 'off')).toMatchObject({ sub: 'OK', active: false });
+    expect(statusChip('filter', 'on', undefined, 'de')).toMatchObject({ sub: 'Wechseln', active: true });
+    expect(statusChip('filter', 'off', undefined, 'de')).toMatchObject({ sub: 'OK', active: false });
   });
   it('bypass/preheat reflect on/off', () => {
-    expect(statusChip('bypass', 'on')).toMatchObject({ icon: 'mdi:valve', sub: 'Offen', active: true });
-    expect(statusChip('preheat', 'off')).toMatchObject({ sub: 'Aus', active: false });
+    expect(statusChip('bypass', 'on', undefined, 'de')).toMatchObject({ icon: 'mdi:valve', sub: 'Offen', active: true });
+    expect(statusChip('preheat', 'off', undefined, 'de')).toMatchObject({ sub: 'Aus', active: false });
   });
   it('season shows sun/Sommer or snowflake/Winter', () => {
-    expect(statusChip('season', 'on')).toMatchObject({ icon: 'mdi:weather-sunny', label: 'Sommer' });
-    expect(statusChip('season', 'off')).toMatchObject({ icon: 'mdi:snowflake', label: 'Winter' });
+    expect(statusChip('season', 'on', undefined, 'de')).toMatchObject({ icon: 'mdi:weather-sunny', label: 'Sommer' });
+    expect(statusChip('season', 'off', undefined, 'de')).toMatchObject({ icon: 'mdi:snowflake', label: 'Winter' });
   });
 });
 
