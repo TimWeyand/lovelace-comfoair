@@ -3,12 +3,12 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { HomeAssistant, LovelaceCard, LovelaceCardEditor, fireEvent } from 'custom-card-helpers';
 import './comfoair-card-editor';
 import { ComfoairCardConfig, DetectHass } from './types';
-import { CARD_TYPE, EDITOR_TYPE, CARD_VERSION, FAN_BUTTONS, FAN_MODE_LABELS, ENTITY_FIELDS } from './const';
+import { CARD_TYPE, EDITOR_TYPE, CARD_VERSION, FAN_BUTTONS, ENTITY_FIELDS } from './const';
 import {
   getState, displayState, numState, isFanModeActive, clampTemperature, autodetectEntities,
   tempDomain, tempColor, rampColor, recoveryPct, statusChip, animSpeedFactor,
 } from './helpers';
-import { localize } from './localize';
+import { localize, fanModeLabel } from './localize';
 
 console.info(
   `%c MQTT-COMFOAIR-CARD %c ${CARD_VERSION} `,
@@ -81,6 +81,7 @@ export class MqttComfoairCard extends LitElement implements LovelaceCard {
     if (!this.hass || !this._config) return html``;
     const cfg = this._config;
     const h = this.hass as unknown as DetectHass;
+    const lang = this.hass.language;
     const climate = getState(h, cfg.entity);
     if (!climate) {
       return html`<ha-card>
@@ -120,17 +121,17 @@ export class MqttComfoairCard extends LitElement implements LovelaceCard {
     const recov = bypassState === 'on' ? null : recoveryPct(t1, t3, t4);
 
     const chips = [
-      statusChip('fan', undefined, fanMode),
-      statusChip('filter', getState(h, cfg.filterstatus)?.state),
-      statusChip('bypass', bypassState),
-      statusChip('preheat', getState(h, cfg.preheat)?.state),
-      statusChip('season', getState(h, cfg.summer_mode)?.state),
+      statusChip('fan', undefined, fanMode, lang),
+      statusChip('filter', getState(h, cfg.filterstatus)?.state, undefined, lang),
+      statusChip('bypass', bypassState, undefined, lang),
+      statusChip('preheat', getState(h, cfg.preheat)?.state, undefined, lang),
+      statusChip('season', getState(h, cfg.summer_mode)?.state, undefined, lang),
     ];
 
     const fmt = (s: string): string => s.replace('.', ',');
     const tempBadge = (color: string, entityId?: string): TemplateResult => {
       const stl = `--fg:${color};--bd:color-mix(in srgb, ${color} 45%, transparent);--bg:color-mix(in srgb, ${color} 14%, transparent)`;
-      return html`<div class="tempbadge ${entityId ? 'clickable' : ''}" style=${stl} @click=${(): void => this._moreInfo(entityId)} title=${entityId ? 'Verlauf anzeigen' : ''}><span class="v">${fmt(displayState(h, entityId))}</span><span class="u">°C</span></div>`;
+      return html`<div class="tempbadge ${entityId ? 'clickable' : ''}" style=${stl} @click=${(): void => this._moreInfo(entityId)} title=${entityId ? localize('show_history', lang) : ''}><span class="v">${fmt(displayState(h, entityId))}</span><span class="u">°C</span></div>`;
     };
     const subRpm = (entityId: string | undefined, factor: number): TemplateResult => {
       const r = numState(h, entityId) ?? 0;
@@ -150,9 +151,9 @@ export class MqttComfoairCard extends LitElement implements LovelaceCard {
     const hub = html`
       <div class="hub corehub">
         <div class="setpc">
-          <button @click=${(): void => this._stepTemp(-1)} aria-label="kälter">−</button>
+          <button @click=${(): void => this._stepTemp(-1)} aria-label=${localize('colder', lang)}>−</button>
           <div class="val">${setpoint != null ? fmt(String(setpoint)) : '—'}<small>°C</small></div>
-          <button @click=${(): void => this._stepTemp(1)} aria-label="wärmer">+</button>
+          <button @click=${(): void => this._stepTemp(1)} aria-label=${localize('warmer', lang)}>+</button>
         </div>
         <div class="fanrow">
           ${FAN_BUTTONS.map(
@@ -170,20 +171,20 @@ export class MqttComfoairCard extends LitElement implements LovelaceCard {
         <div class="hd">
           <div class="ic"><ha-icon icon="mdi:hvac"></ha-icon></div>
           <div>
-            <div class="ttl">${cfg.name || 'Wohnraumlüftung'}</div>
-            <div class="st"><span class="dot ${running ? 'live' : ''}"></span><span>${fanModeLc ? (FAN_MODE_LABELS[fanModeLc] ?? fanMode) : '—'}</span></div>
+            <div class="ttl">${cfg.name || localize('default_name', lang)}</div>
+            <div class="st"><span class="dot ${running ? 'live' : ''}"></span><span>${fanModeLc ? fanModeLabel(fanMode, lang) : '—'}</span></div>
           </div>
           <div class="grow"></div>
           <div class="recov">
-            ${recov != null ? html`<b>${recov}%</b><span>Rückgewinnung</span>` : ''}
+            ${recov != null ? html`<b>${recov}%</b><span>${localize('heat_recovery', lang)}</span>` : ''}
           </div>
         </div>
 
         <div class="lanes">
           <div class="trow top">
-            <div class="tcell l">${subRpm(cfg.fan_speed_supply, facSup)}${tempBadge(c1, cfg.tempSensor1)}${lbl('mdi:tree-outline', 'Außenluft')}</div>
+            <div class="tcell l">${subRpm(cfg.fan_speed_supply, facSup)}${tempBadge(c1, cfg.tempSensor1)}${lbl('mdi:tree-outline', localize('outside_air', lang))}</div>
             <div></div>
-            <div class="tcell r">${subPct(cfg.return_air_level)}${tempBadge(c3, cfg.tempSensor3)}${lbl('mdi:home-thermometer-outline', 'Abluft', true)}</div>
+            <div class="tcell r">${subPct(cfg.return_air_level)}${tempBadge(c3, cfg.tempSensor3)}${lbl('mdi:home-thermometer-outline', localize('return_air', lang), true)}</div>
           </div>
 
           <div class="flowband">
@@ -209,9 +210,9 @@ export class MqttComfoairCard extends LitElement implements LovelaceCard {
           </div>
 
           <div class="trow bot">
-            <div class="tcell l">${lbl('mdi:export', 'Fortluft')}${tempBadge(c2, cfg.tempSensor2)}${subRpm(cfg.fan_speed_exhaust, facExh)}</div>
+            <div class="tcell l">${lbl('mdi:export', localize('exhaust_air', lang))}${tempBadge(c2, cfg.tempSensor2)}${subRpm(cfg.fan_speed_exhaust, facExh)}</div>
             <div></div>
-            <div class="tcell r">${lbl('mdi:import', 'Zuluft', true)}${tempBadge(c4, cfg.tempSensor4)}${subPct(cfg.supply_air_level)}</div>
+            <div class="tcell r">${lbl('mdi:import', localize('supply_air', lang), true)}${tempBadge(c4, cfg.tempSensor4)}${subPct(cfg.supply_air_level)}</div>
           </div>
         </div>
 

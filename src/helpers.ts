@@ -1,5 +1,5 @@
 import { ComfoairCardConfig, DetectHass, HassEntityLike } from './types';
-import { FAN_MODE_LABELS } from './const';
+import { localize, fanModeLabel } from './localize';
 
 export function getState(
   hass: DetectHass | undefined,
@@ -145,24 +145,24 @@ export interface StatusChip {
 }
 
 export function statusChip(
-  kind: StatusKind, raw: string | undefined, fanMode?: string,
+  kind: StatusKind, raw: string | undefined, fanMode?: string, lang?: string,
 ): StatusChip {
   const on = raw === 'on';
   switch (kind) {
     case 'fan': {
       const fm = (fanMode ?? 'off').toLowerCase();
-      return { icon: 'mdi:fan', label: 'Lüfter', sub: FAN_MODE_LABELS[fm] ?? fm, active: fm !== 'off', color: '#03a9f4' };
+      return { icon: 'mdi:fan', label: localize('chip_fan', lang), sub: fanModeLabel(fm, lang), active: fm !== 'off', color: '#03a9f4' };
     }
     case 'filter':
-      return { icon: 'mdi:air-filter', label: 'Filter', sub: on ? 'Wechseln' : 'OK', active: on, color: '#f5a623' };
+      return { icon: 'mdi:air-filter', label: localize('chip_filter', lang), sub: localize(on ? 'filter_replace' : 'filter_ok', lang), active: on, color: '#f5a623' };
     case 'bypass':
-      return { icon: 'mdi:valve', label: 'Bypass', sub: on ? 'Offen' : 'Zu', active: on, color: '#36c46b' };
+      return { icon: 'mdi:valve', label: localize('chip_bypass', lang), sub: localize(on ? 'bypass_open' : 'bypass_closed', lang), active: on, color: '#36c46b' };
     case 'preheat':
-      return { icon: 'mdi:radiator', label: 'Vorheizen', sub: on ? 'Aktiv' : 'Aus', active: on, color: '#ff7043' };
+      return { icon: 'mdi:radiator', label: localize('chip_preheating', lang), sub: localize(on ? 'state_active' : 'state_off', lang), active: on, color: '#ff7043' };
     case 'season':
       return on
-        ? { icon: 'mdi:weather-sunny', label: 'Sommer', sub: '', active: true, color: '#ffb300' }
-        : { icon: 'mdi:snowflake', label: 'Winter', sub: '', active: true, color: '#4fc3f7' };
+        ? { icon: 'mdi:weather-sunny', label: localize('chip_summer', lang), sub: '', active: true, color: '#ffb300' }
+        : { icon: 'mdi:snowflake', label: localize('chip_winter', lang), sub: '', active: true, color: '#4fc3f7' };
   }
 }
 
