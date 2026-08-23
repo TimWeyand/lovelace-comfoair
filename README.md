@@ -3,101 +3,102 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=TimWeyand&repository=lovelace-comfoair&category=plugin)
 
-Lovelace-Karte zur Visualisierung und Steuerung einer **ComfoAir CA350/550** Lüftungsanlage,
-angebunden über **[hacomfoairmqtt](https://github.com/adorobis/hacomfoairmqtt)** (adorobis) bzw. das
-darauf basierende **comfoair2mqtt**-Add-on (MQTT Autodiscovery).
+Lovelace card for visualizing and controlling a **ComfoAir CA350/550** ventilation system,
+connected through **[hacomfoairmqtt](https://github.com/adorobis/hacomfoairmqtt)** (adorobis) or the
+related **comfoair2mqtt** add-on (MQTT autodiscovery).
 
 <img src="https://raw.githubusercontent.com/TimWeyand/lovelace-comfoair/master/images/static-dark.png" alt="MQTT Comfoair Card" width="440">
 
 ## Features
 
-- **Ein-Klick-Konfiguration:** nur die climate-Entity wählen — alle Sensoren werden automatisch erkannt.
-- Gekreuzte Luftströme (Außen-/Ab-/Fort-/Zuluft) mit **temperaturbasierter Farbskala** (OKLCH, Blau→Dunkelrot).
-- **Wärmerückgewinnungs-%** live aus den Temperaturen berechnet.
-- Sollwert-Steuerung (− / +) und Lüfterstufen (Aus / 1 / 2 / 3) mit hervorgehobener aktiver Stufe.
-- Status-Leiste (Lüfter, Filter, Bypass, Vorheizen, Sommer/Winter) — beschriftet und farblich nach Zustand.
-- **Statisch oder animiert** (Luftströme + rotierende Lüfter), Tempo fest **oder** an die Luftmenge gekoppelt.
-- Optional einblendbare **Temperatur-Legende**.
-- Klick auf einen Wert (Temperatur / Drehzahl / Luftmenge) öffnet den **Verlauf** (HA More-Info-Dialog).
+- **One-click configuration:** select only the climate entity; all sensors are detected automatically.
+- Crossed airflows (outside/exhaust/return/supply) with a **temperature-based color scale** (OKLCH, blue to dark red).
+- **Heat recovery percentage** calculated live from the temperatures.
+- Setpoint control (− / +) and fan levels (off / 1 / 2 / 3) with the active level highlighted.
+- Status bar (fan, filter, bypass, preheating, summer/winter), labeled and color-coded by state.
+- **Static or animated** (airflows + rotating fans), with a fixed speed **or** speed linked to the airflow level.
+- Optional **temperature legend**.
+- Click a value (temperature / speed / airflow) to open its **history** in the Home Assistant More Info dialog.
 
-## Galerie
+## Gallery
 
-| | Statisch (Standard) | Animiert (`animation: animated`) |
+| | Static (default) | Animated (`animation: animated`) |
 |---|---|---|
-| **Hell** | <img src="https://raw.githubusercontent.com/TimWeyand/lovelace-comfoair/master/images/static-light.png" width="320" alt="Statisch hell"> | <img src="https://raw.githubusercontent.com/TimWeyand/lovelace-comfoair/master/images/animated-light.gif" width="320" alt="Animiert hell"> |
-| **Dunkel** | <img src="https://raw.githubusercontent.com/TimWeyand/lovelace-comfoair/master/images/static-dark.png" width="320" alt="Statisch dunkel"> | <img src="https://raw.githubusercontent.com/TimWeyand/lovelace-comfoair/master/images/animated-dark.gif" width="320" alt="Animiert dunkel"> |
+| **Light** | <img src="https://raw.githubusercontent.com/TimWeyand/lovelace-comfoair/master/images/static-light.png" width="320" alt="Static light"> | <img src="https://raw.githubusercontent.com/TimWeyand/lovelace-comfoair/master/images/animated-light.gif" width="320" alt="Animated light"> |
+| **Dark** | <img src="https://raw.githubusercontent.com/TimWeyand/lovelace-comfoair/master/images/static-dark.png" width="320" alt="Static dark"> | <img src="https://raw.githubusercontent.com/TimWeyand/lovelace-comfoair/master/images/animated-dark.gif" width="320" alt="Animated dark"> |
 
 ## Installation
 
 ### HACS
-**Schnellster Weg:** auf den **„Open in HACS"-Button** oben klicken → öffnet das Repo in deinem
-HACS, dort **Download** wählen.
+**Fastest option:** click the **“Open in HACS” button** above. It opens the repository in HACS;
+choose **Download** there.
 
-Falls dein HACS das Repo nicht direkt übernimmt, einmalig als Custom Repository hinzufügen:
-1. HACS → oben rechts **⋮** → **Custom repositories**
-2. Repository `https://github.com/TimWeyand/lovelace-comfoair`, Kategorie **Dashboard** → **Add**
-3. „MQTT Comfoair Card" → **Download**
+If HACS does not find the repository directly, add it once as a custom repository:
+1. HACS → top right **⋮** → **Custom repositories**
+2. Repository `https://github.com/TimWeyand/lovelace-comfoair`, category **Dashboard** → **Add**
+3. **MQTT Comfoair Card** → **Download**
 
-### Manuell
-`comfoair-card.js` aus dem **[letzten Release](../../releases/latest)** (oder aus dem Repo) laden
-und nach `config/www/lovelace-comfoair/comfoair-card.js` kopieren, dann als Ressource registrieren:
+### Manual
+Download `comfoair-card.js` from the **[latest release](../../releases/latest)** (or from the repository),
+copy it to `config/www/lovelace-comfoair/comfoair-card.js`, and register it as a resource:
 ```yaml
 url: /local/lovelace-comfoair/comfoair-card.js
 type: module
 ```
 
-## Konfiguration
+## Configuration
 
-1. Dashboard → Karte hinzufügen → „MQTT Comfoair Card".
-2. **Nur die climate-Entity auswählen** (z. B. `climate.ca350_climate`) — die übrigen Entities
-   werden automatisch erkannt. Unter „Erweitert / manuelle Zuordnung" überschreibbar.
+1. Dashboard → Add card → **MQTT Comfoair Card**.
+2. **Select only the climate entity** (for example, `climate.ca350_climate`); the remaining entities
+   are detected automatically. They can be overridden under **Advanced / manual mapping**.
 
-<img src="https://raw.githubusercontent.com/TimWeyand/lovelace-comfoair/master/images/settings.png" alt="Karten-Editor mit allen Optionen" width="460">
+<img src="https://raw.githubusercontent.com/TimWeyand/lovelace-comfoair/master/images/settings.png" alt="Card editor with all options" width="460">
 
-### Optionen
+### Options
 
-| Option | Werte | Default | Beschreibung |
+| Option | Values | Default | Description |
 |--------|-------|---------|--------------|
-| `entity` | climate-Entity | – | **Pflicht.** Die ComfoAir climate-Entity. |
-| `name` | Text | „Wohnraumlüftung" | Titel im Kopf der Karte. |
-| `animation` | `static` / `animated` | `static` | Animierte Luftströme + rotierende Lüfter. |
-| `animation_speed_source` | `fixed` / `level` | `fixed` | Tempo fest (%) oder proportional zur Luftmenge (Supply/Return Air Level). |
-| `animation_speed` | `10`–`200` (%) | `50` | Festes Tempo (nur bei `fixed`). 100 % = Basistempo. |
-| `color_scale` | `auto` / `fixed` | `auto` | `auto` spreizt über die aktuellen vier Temperaturen; `fixed` nutzt `temp_min`/`temp_max`. |
-| `temp_min` | °C | `-10` | Untere Grenze der festen Skala. |
-| `temp_max` | °C | `30` | Obere Grenze der festen Skala. |
-| `show_legend` | bool | `false` | Kleine Temperatur-Farbskala unten einblenden. |
-| `tempSensor1..4`, `filterstatus`, `bypass_valve`, `summer_mode`, `preheat`, `fan_speed_supply`, `fan_speed_exhaust`, `return_air_level`, `supply_air_level` | Entity | auto-erkannt | Einzeln überschreibbar. |
+| `entity` | climate entity | – | **Required.** The ComfoAir climate entity. |
+| `name` | Text | “Residential ventilation” | Title in the card header. |
+| `animation` | `static` / `animated` | `static` | Animated airflows + rotating fans. |
+| `animation_speed_source` | `fixed` / `level` | `fixed` | Fixed speed (%) or proportional to the airflow level (supply/return air level). |
+| `animation_speed` | `10`–`200` (%) | `50` | Fixed speed (only with `fixed`). 100% = base speed. |
+| `color_scale` | `auto` / `fixed` | `auto` | `auto` spans the current four temperatures; `fixed` uses `temp_min`/`temp_max`. |
+| `temp_min` | °C | `-10` | Lower limit of the fixed scale. |
+| `temp_max` | °C | `30` | Upper limit of the fixed scale. |
+| `show_legend` | bool | `false` | Show a small temperature color scale at the bottom. |
+| `tempSensor1..4`, `filterstatus`, `bypass_valve`, `summer_mode`, `preheat`, `fan_speed_supply`, `fan_speed_exhaust`, `return_air_level`, `supply_air_level` | Entity | auto-detected | Can be overridden individually. |
 
 ### Performance
-Im Default (`static`) läuft **keine** Animation — kein SMIL, keine CSS-Rotation. Die Karte
-rendert nur neu, wenn sich eine der konfigurierten Entities ändert.
+By default (`static`), **no** animation runs: no SMIL and no CSS rotation. The card only
+re-renders when one of the configured entities changes.
 
-## Abwärtskompatibilität
-Konfigurationen früherer Versionen funktionieren **unverändert** weiter — die Konfig-Schlüssel
-sind gleich geblieben. Neue Optionen sind optional. Wer auf der alten Karte bleiben möchte,
-kann in HACS gezielt die alte Version (`v0.15.0`) installiert lassen.
+## Backward compatibility
+Configurations from earlier versions continue to work **unchanged**; the configuration keys remain the same.
+New options are optional. To stay on the previous card, install version (`v0.15.0`) through HACS.
 
-## Entwicklung & Release
+## Development & Release
 
 ```bash
 npm install
 npm run typecheck   # TypeScript (strict)
-npm test            # Unit-Tests (Vitest)
-npm run build       # erzeugt comfoair-card.js (im CI gebaut + committet)
+npm test            # Unit tests (Vitest)
+npm run build       # generates comfoair-card.js (built and committed by CI)
 ```
 
-Releases laufen automatisch: Bei jedem Push auf `master` baut/testet die GitHub-Action, **committet
-das frisch gebaute `comfoair-card.js` ins Repo** (für die HACS-Auflösung) und erstellt ein Release
-inkl. angehängtem Bundle. Die Release-Version ist die `version` aus `package.json` (Tag `vX.Y.Z`);
-existiert dieser Tag schon, wird automatisch die **Patch**-Version erhöht. Für gezielte
-minor/major-Sprünge die `version` in `package.json` setzen. Das Bundle muss nicht von Hand gebaut/committet werden.
+Releases run automatically: on every push to `master`, the GitHub Action builds and tests the project,
+**commits the freshly built `comfoair-card.js` to the repository** (for HACS resolution), and creates
+a release with the bundle attached. The release version comes from `version` in `package.json` (tag
+`vX.Y.Z`). If the tag already exists, the **patch** version is incremented automatically. To make a
+minor or major version change, update `version` in `package.json`. The bundle does not need to be built
+or committed manually.
 
-## Hinweise
-- Erwartet die von hacomfoairmqtt publizierten Entitäten (`…_outside/supply/return/exhaust_temperature`,
+## Notes
+- Expects the entities published by hacomfoairmqtt (`…_outside/supply/return/exhaust_temperature`,
   `…_supply/return_air_level`, `…_supply/exhaust_fan_speed`, `binary_sensor.…_filter_status`/`_bypass_valve`/
-  `_summer_mode`/`_preheating_status`). Der Geräte-Präfix (`ca350`, …) ist egal — erkannt wird primär über das HA-Gerät.
-- **Voraussetzung:** Die `climate`-Entity muss von der Bridge publiziert werden — dafür in der
-  Bridge-Konfiguration (`config.ini`) `HAEnableAutoDiscoveryClimate` aktivieren. Sie liefert die
-  Lüfterstufen (off/low/medium/high) und den Sollwert (15–27 °C).
-- Gilt auch für kompatible Geräte über dieselbe Bridge (StorkAir WHR930, Wernig G90-380, Paul Santos 370 DC).
+  `_summer_mode`/`_preheating_status`). The device prefix (`ca350`, …) does not matter; detection primarily
+  uses the Home Assistant device.
+- **Requirement:** the `climate` entity must be published by the bridge. Enable `HAEnableAutoDiscoveryClimate`
+  in the bridge configuration (`config.ini`). It provides the fan levels (off/low/medium/high) and setpoint
+  (15–27 °C).
+- Also applies to compatible devices using the same bridge (StorkAir WHR930, Wernig G90-380, Paul Santos 370 DC).
