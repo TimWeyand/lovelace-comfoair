@@ -25,27 +25,11 @@ const ADVANCED_SCHEMA: FormSchema[] = [
 ];
 
 const LABELS: Record<string, string> = {
-  entity: 'CA350/550 Climate-Entity (Pflicht)',
-  animation: 'Animation',
-  animation_speed_source: 'Tempo-Quelle',
-  animation_speed: 'Festes Tempo (%)',
-  color_scale: 'Farbskala',
-  temp_min: 'Feste Skala – Min (°C)',
-  temp_max: 'Feste Skala – Max (°C)',
-  show_legend: 'Temperaturskala einblenden',
-  name: 'Name (optional)',
-  tempSensor1: 'Außentemperatur',
-  tempSensor2: 'Fortlufttemperatur',
-  tempSensor3: 'Rücklufttemperatur',
-  tempSensor4: 'Zulufttemperatur',
-  filterstatus: 'Filterstatus',
-  bypass_valve: 'Bypass-Ventil',
-  summer_mode: 'Sommermodus',
-  preheat: 'Vorheizregister',
-  fan_speed_supply: 'Lüfterdrehzahl Zuluft',
-  fan_speed_exhaust: 'Lüfterdrehzahl Fortluft',
-  return_air_level: 'Rückluft-Stufe',
-  supply_air_level: 'Zuluft-Stufe',
+  entity: 'climate_entity', animation: 'animation', animation_speed_source: 'speed_source', animation_speed: 'fixed_speed',
+  color_scale: 'color_scale', temp_min: 'fixed_min', temp_max: 'fixed_max', show_legend: 'show_scale', name: 'optional_name',
+  tempSensor1: 'outside_temperature', tempSensor2: 'exhaust_temperature', tempSensor3: 'return_temperature', tempSensor4: 'supply_temperature',
+  filterstatus: 'filter_status', bypass_valve: 'bypass_valve', summer_mode: 'summer_mode', preheat: 'preheat_register',
+  fan_speed_supply: 'supply_fan_speed', fan_speed_exhaust: 'exhaust_fan_speed', return_air_level: 'return_level', supply_air_level: 'supply_level',
 };
 
 @customElement(EDITOR_TYPE)
@@ -64,22 +48,22 @@ export class MqttComfoairCardEditor extends LitElement implements LovelaceCardEd
     const schema: FormSchema[] = [
       { name: 'entity', required: true, selector: { entity: { domain: 'climate' } } },
       { name: 'animation', selector: { select: { options: [
-        { value: 'animated', label: 'Animiert (Luftströme + Lüfter)' },
-        { value: 'static', label: 'Statisch' },
+        { value: 'animated', label: localize('animated', this.hass.language) },
+        { value: 'static', label: localize('static', this.hass.language) },
       ] } } },
     ];
     if (cfg.animation === 'animated') {
       schema.push({ name: 'animation_speed_source', selector: { select: { options: [
-        { value: 'fixed', label: 'Festes Tempo (%)' },
-        { value: 'level', label: 'Nach Luftmenge (Supply/Return %)' },
+        { value: 'fixed', label: localize('fixed_speed', this.hass.language) },
+        { value: 'level', label: localize('air_level', this.hass.language) },
       ] } } });
       if (cfg.animation_speed_source !== 'level') {
         schema.push({ name: 'animation_speed', selector: { number: { min: 10, max: 200, step: 10, unit_of_measurement: '%', mode: 'slider' } } });
       }
     }
     schema.push({ name: 'color_scale', selector: { select: { options: [
-      { value: 'auto', label: 'Auto (aktuelle Werte)' },
-      { value: 'fixed', label: 'Fest (manueller Bereich)' },
+      { value: 'auto', label: localize('auto_current', this.hass.language) },
+      { value: 'fixed', label: localize('fixed_manual', this.hass.language) },
     ] } } });
     if (cfg.color_scale === 'fixed') {
       schema.push(
@@ -120,7 +104,7 @@ export class MqttComfoairCardEditor extends LitElement implements LovelaceCardEd
   }
 
   private _label = (schemaItem: { name: string }): string =>
-    LABELS[schemaItem.name] ?? schemaItem.name;
+    localize(LABELS[schemaItem.name] ?? schemaItem.name, this.hass?.language);
 
   private _mainChanged(ev: CustomEvent): void {
     ev.stopPropagation();
