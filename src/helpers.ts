@@ -20,6 +20,57 @@ export function displayState(
   return st.state;
 }
 
+/** Ausschnitt aus hass.locale (HA FrontendLocaleData), soweit für Zahlen nötig. */
+export interface LocaleLike {
+  language?: string;
+  number_format?: string;
+}
+
+/** Bisheriges (fest verdrahtetes) Trennzeichen – Fallback ohne Locale-Angabe, damit sich nichts ändert. */
+export const LEGACY_DECIMAL_SEPARATOR = ',';
+
+/**
+ * Feste Zahlenformate → Locale, wie im HA-Frontend (src/common/number/format_number.ts).
+ * 'none' formatiert HA ungruppiert als en-US.
+ */
+const NUMBER_FORMAT_LOCALES: Record<string, string> = {
+  comma_decimal: 'en-US',
+  decimal_comma: 'de',
+  space_comma: 'fr',
+  quote_decimal: 'de-CH',
+  none: 'en-US',
+};
+
+/**
+ * Dezimaltrennzeichen gemäß HA-Profileinstellung „Zahlenformat“ (hass.locale.number_format):
+ * feste Formate über die Tabelle oben, 'system' über die Browser-Locale, sonst ('language'
+ * oder fehlend) über hass.locale.language bzw. hass.language.
+ * Ohne jede Locale-Angabe – oder falls Intl fehlt/wirft – bleibt es beim bisherigen Komma.
+ */
+export function decimalSeparator(locale?: LocaleLike, language?: string): string {
+  const nf = locale?.number_format;
+  let tag: string | undefined;
+  if (nf && nf in NUMBER_FORMAT_LOCALES) {
+    tag = NUMBER_FORMAT_LOCALES[nf];
+  } else if (nf !== 'system') {
+    tag = locale?.language ?? language;
+    if (tag === undefined) return LEGACY_DECIMAL_SEPARATOR;
+  }
+  try {
+    return new Intl.NumberFormat(tag).formatToParts(1.5).find((p) => p.type === 'decimal')?.value ?? LEGACY_DECIMAL_SEPARATOR;
+  } catch {
+    return LEGACY_DECIMAL_SEPARATOR;
+  }
+}
+
+/**
+ * Tauscht nur bei Dezimalzahlen ("19.5", "-3.5", "+0.5", ".5") den Punkt. HA-States kommen
+ * aus Pythons str(float); Ganzzahlen ("23"), "—", Exponenten und Text bleiben unverändert.
+ */
+export function formatDecimal(value: string, sep: string): string {
+  return /^[-+]?\d*\.\d+$/.test(value) ? value.replace('.', sep) : value;
+}
+
 /** Zahl aus einem State; undefined falls nicht parsebar. */
 export function numState(hass: DetectHass | undefined, entityId?: string): number | undefined {
   const st = getState(hass, entityId);
