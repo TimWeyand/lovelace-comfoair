@@ -7,6 +7,7 @@ import { CARD_TYPE, EDITOR_TYPE, CARD_VERSION, FAN_BUTTONS, FAN_MODE_LABELS, ENT
 import {
   getState, displayState, numState, isFanModeActive, clampTemperature, autodetectEntities,
   tempDomain, tempColor, rampColor, recoveryPct, statusChip, animSpeedFactor,
+  decimalSeparator, formatDecimal,
 } from './helpers';
 import { localize } from './localize';
 
@@ -72,6 +73,7 @@ export class MqttComfoairCard extends LitElement implements LovelaceCard {
     if (changed.has('_config')) return true;
     const old = changed.get('hass') as HomeAssistant | undefined;
     if (!old || !this._config) return true;
+    if (old.locale !== this.hass.locale || old.language !== this.hass.language) return true;
     const cfg = this._config as unknown as Record<string, string | undefined>;
     const ids = ENTITY_FIELDS.map((f) => cfg[f]).filter((x): x is string => !!x);
     return ids.some((id) => old.states[id] !== this.hass.states[id]);
@@ -127,7 +129,8 @@ export class MqttComfoairCard extends LitElement implements LovelaceCard {
       statusChip('season', getState(h, cfg.summer_mode)?.state),
     ];
 
-    const fmt = (s: string): string => s.replace('.', ',');
+    const sep = decimalSeparator(this.hass.locale, this.hass.language);
+    const fmt = (s: string): string => formatDecimal(s, sep);
     const tempBadge = (color: string, entityId?: string): TemplateResult => {
       const stl = `--fg:${color};--bd:color-mix(in srgb, ${color} 45%, transparent);--bg:color-mix(in srgb, ${color} 14%, transparent)`;
       return html`<div class="tempbadge ${entityId ? 'clickable' : ''}" style=${stl} @click=${(): void => this._moreInfo(entityId)} title=${entityId ? 'Verlauf anzeigen' : ''}><span class="v">${fmt(displayState(h, entityId))}</span><span class="u">°C</span></div>`;
@@ -138,11 +141,11 @@ export class MqttComfoairCard extends LitElement implements LovelaceCard {
       const dur = SPIN_BASE / factor;
       return html`<div class="subt ${entityId ? 'clickable' : ''}" @click=${(): void => this._moreInfo(entityId)}>
         <ha-icon class=${spin ? 'spinico spin' : 'spinico'} style=${spin ? `animation-duration:${dur.toFixed(2)}s` : ''} icon="mdi:fan"></ha-icon>
-        <span>${displayState(h, entityId)}</span>&nbsp;rpm
+        <span>${fmt(displayState(h, entityId))}</span>&nbsp;rpm
       </div>`;
     };
     const subPct = (entityId?: string): TemplateResult => html`<div class="subt ${entityId ? 'clickable' : ''}" @click=${(): void => this._moreInfo(entityId)}>
-        <ha-icon icon="mdi:gauge"></ha-icon><span>${displayState(h, entityId)}</span>&nbsp;%
+        <ha-icon icon="mdi:gauge"></ha-icon><span>${fmt(displayState(h, entityId))}</span>&nbsp;%
       </div>`;
     const lbl = (icon: string, text: string, rev = false): TemplateResult =>
       html`<div class="lbl ${rev ? 'rev' : ''}"><ha-icon icon=${icon}></ha-icon>${text}</div>`;
