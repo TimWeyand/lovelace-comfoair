@@ -1,3 +1,26 @@
+## English and Polish localization (fork)
+
+This fork adds complete **English**, **Polish**, and **German** translations for the card,
+status indicators, accessible button labels, tooltips, and visual configuration editor.
+Existing Norwegian messages remain available; missing translations fall back to English.
+
+The language defaults to the Home Assistant user language. You can override it per card:
+
+```yaml
+type: custom:mqttcomfoair-card
+entity: climate.your_ventilation
+language: pl  # auto (default), en, pl, de
+```
+
+Choose **Language / Język** in the visual editor. `auto` follows language changes in Home
+Assistant without requiring sensor updates. Temperatures use locale-specific decimal
+separators and at most one decimal place. Entity IDs, fan modes, and service calls remain
+unchanged. Install this fork instead of the upstream JavaScript resource, since both
+register the same custom element. After replacing the resource, reset the Companion app
+frontend cache if old labels or configuration errors remain.
+
+---
+
 # Home Assistant Lovelace MQTT Comfoair Card
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)

@@ -4,7 +4,7 @@ import { HomeAssistant, LovelaceCardEditor, fireEvent } from 'custom-card-helper
 import { ComfoairCardConfig, DetectHass } from './types';
 import { EDITOR_TYPE, ENTITY_FIELDS } from './const';
 import { autodetectEntities } from './helpers';
-import { localize } from './localize';
+import { localize, resolveLanguage } from './localize';
 
 type FormSchema = Record<string, unknown>;
 
@@ -24,30 +24,6 @@ const ADVANCED_SCHEMA: FormSchema[] = [
   { name: 'supply_air_level', selector: { entity: { domain: 'sensor' } } },
 ];
 
-const LABELS: Record<string, string> = {
-  entity: 'CA350/550 Climate-Entity (Pflicht)',
-  animation: 'Animation',
-  animation_speed_source: 'Tempo-Quelle',
-  animation_speed: 'Festes Tempo (%)',
-  color_scale: 'Farbskala',
-  temp_min: 'Feste Skala – Min (°C)',
-  temp_max: 'Feste Skala – Max (°C)',
-  show_legend: 'Temperaturskala einblenden',
-  name: 'Name (optional)',
-  tempSensor1: 'Außentemperatur',
-  tempSensor2: 'Fortlufttemperatur',
-  tempSensor3: 'Rücklufttemperatur',
-  tempSensor4: 'Zulufttemperatur',
-  filterstatus: 'Filterstatus',
-  bypass_valve: 'Bypass-Ventil',
-  summer_mode: 'Sommermodus',
-  preheat: 'Vorheizregister',
-  fan_speed_supply: 'Lüfterdrehzahl Zuluft',
-  fan_speed_exhaust: 'Lüfterdrehzahl Fortluft',
-  return_air_level: 'Rückluft-Stufe',
-  supply_air_level: 'Zuluft-Stufe',
-};
-
 @customElement(EDITOR_TYPE)
 export class MqttComfoairCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass!: HomeAssistant;
@@ -61,25 +37,27 @@ export class MqttComfoairCardEditor extends LitElement implements LovelaceCardEd
   /** Haupt-Schema; blendet Felder aus, die im aktuellen Modus keine Wirkung haben. */
   private _mainSchema(): FormSchema[] {
     const cfg = this._config;
+    const t = (key: string): string => localize(key, resolveLanguage(cfg.language, this.hass?.language));
     const schema: FormSchema[] = [
+      { name: 'language', selector: { select: { options: ['auto', 'en', 'pl', 'de'].map(value => ({ value, label: value === 'auto' ? t('auto') : ({en:'English', pl:'Polski', de:'Deutsch'}[value] || value) })) } } },
       { name: 'entity', required: true, selector: { entity: { domain: 'climate' } } },
       { name: 'animation', selector: { select: { options: [
-        { value: 'animated', label: 'Animiert (Luftströme + Lüfter)' },
-        { value: 'static', label: 'Statisch' },
+        { value: 'animated', label: t('animated') },
+        { value: 'static', label: t('static') },
       ] } } },
     ];
     if (cfg.animation === 'animated') {
       schema.push({ name: 'animation_speed_source', selector: { select: { options: [
-        { value: 'fixed', label: 'Festes Tempo (%)' },
-        { value: 'level', label: 'Nach Luftmenge (Supply/Return %)' },
+        { value: 'fixed', label: t('animation_speed') },
+        { value: 'level', label: t('level') },
       ] } } });
       if (cfg.animation_speed_source !== 'level') {
         schema.push({ name: 'animation_speed', selector: { number: { min: 10, max: 200, step: 10, unit_of_measurement: '%', mode: 'slider' } } });
       }
     }
     schema.push({ name: 'color_scale', selector: { select: { options: [
-      { value: 'auto', label: 'Auto (aktuelle Werte)' },
-      { value: 'fixed', label: 'Fest (manueller Bereich)' },
+      { value: 'auto', label: t('auto_scale') },
+      { value: 'fixed', label: t('fixed_scale') },
     ] } } });
     if (cfg.color_scale === 'fixed') {
       schema.push(
@@ -103,10 +81,10 @@ export class MqttComfoairCardEditor extends LitElement implements LovelaceCardEd
           @value-changed=${this._mainChanged}
         ></ha-form>
         ${this._detectedCount > 0
-          ? html`<div class="hint">✓ ${this._detectedCount} ${localize('detected', this.hass.language)}</div>`
+          ? html`<div class="hint">✓ ${this._detectedCount} ${localize('detected', resolveLanguage(this._config.language, this.hass.language))}</div>`
           : ''}
         <ha-expansion-panel outlined>
-          <span slot="header">${localize('advanced', this.hass.language)}</span>
+          <span slot="header">${localize('advanced', resolveLanguage(this._config.language, this.hass.language))}</span>
           <ha-form
             .hass=${this.hass}
             .data=${this._config}
@@ -120,7 +98,7 @@ export class MqttComfoairCardEditor extends LitElement implements LovelaceCardEd
   }
 
   private _label = (schemaItem: { name: string }): string =>
-    LABELS[schemaItem.name] ?? schemaItem.name;
+    localize(schemaItem.name === 'preheat' ? 'preheat_field' : schemaItem.name, resolveLanguage(this._config.language, this.hass?.language));
 
   private _mainChanged(ev: CustomEvent): void {
     ev.stopPropagation();

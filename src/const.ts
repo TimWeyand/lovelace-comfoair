@@ -1,4 +1,4 @@
-export const CARD_VERSION = '0.16.3';
+export const CARD_VERSION = '0.17.0';
 export const CARD_TYPE = 'mqttcomfoair-card';
 export const EDITOR_TYPE = 'mqttcomfoair-card-editor';
 

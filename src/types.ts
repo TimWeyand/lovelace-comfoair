@@ -3,6 +3,7 @@ import { LovelaceCardConfig } from 'custom-card-helpers';
 export interface ComfoairCardConfig extends LovelaceCardConfig {
   type: string;
   name?: string;
+  language?: 'auto' | 'en' | 'pl' | 'de';
   entity: string;
   tempSensor1?: string; // Außentemperatur
   tempSensor2?: string; // Fortlufttemperatur
