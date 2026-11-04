@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { localize, resolveLanguage, STRINGS } from '../src/localize';
+import { fanModeLabel, localize, resolveLanguage, STRINGS } from '../src/localize';
 import { statusChip } from '../src/helpers';
 
 describe('language selection', () => {
+  it('selects Dutch and translates the card and editor', () => {
+    expect(resolveLanguage('auto', 'nl-NL')).toBe('nl');
+    expect(localize('outdoor', 'nl')).toBe('Buitenlucht');
+    expect(localize('animation', 'nl')).toBe('Animatie');
+  });
   it('uses Home Assistant language in automatic mode', () => {
     expect(resolveLanguage(undefined, 'pl-PL')).toBe('pl');
     expect(resolveLanguage('auto', 'en-US')).toBe('en');
@@ -21,7 +26,17 @@ describe('language selection', () => {
 });
 
 describe('complete translations', () => {
-  for (const language of ['pl', 'de']) {
+  it('uses the same translated fan labels for the card and status chips', () => {
+    expect(fanModeLabel('HIGH', 'nl')).toBe('Stand 3');
+    expect(statusChip('fan', undefined, 'HIGH', 'nl').sub).toBe('Stand 3');
+    expect(fanModeLabel('off', 'pl')).toBe('Wyłączony');
+    expect(fanModeLabel('custom_mode', 'en')).toBe('custom_mode');
+  });
+  it('preserves Norwegian messages and falls back to English for new keys', () => {
+    expect(localize('advanced', 'nb-NO')).toBe('Avansert / manuell tilordning');
+    expect(localize('recovery', 'nb-NO')).toBe('Heat recovery');
+  });
+  for (const language of ['pl', 'de', 'nl']) {
     it(`${language} covers every English key`, () => {
       expect(Object.keys(STRINGS[language]).sort()).toEqual(Object.keys(STRINGS.en).sort());
       expect(Object.values(STRINGS[language]).every(value => value.trim().length > 0)).toBe(true);

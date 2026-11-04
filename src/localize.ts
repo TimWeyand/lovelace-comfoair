@@ -1,4 +1,62 @@
 export const STRINGS: Record<string, Record<string, string>> = {
+  "nl": {
+    "invalid_config": "Ongeldige configuratie",
+    "no_entity": "Geen climate-entiteit ingesteld",
+    "detected": "entiteiten gevonden",
+    "advanced": "Geavanceerd / handmatig toewijzen",
+    "title": "Woonhuisventilatie",
+    "history": "Geschiedenis tonen",
+    "colder": "Kouder",
+    "warmer": "Warmer",
+    "recovery": "Terugwinning",
+    "outdoor": "Buitenlucht",
+    "extract": "Retourlucht",
+    "exhaust": "Afvoerlucht",
+    "supply": "Toevoerlucht",
+    "fan": "Ventilator",
+    "off": "Uit",
+    "filter": "Filter",
+    "replace": "Vervangen",
+    "ok": "OK",
+    "bypass": "Bypass",
+    "open": "Open",
+    "closed": "Dicht",
+    "preheat": "Voorverwarming",
+    "active": "Actief",
+    "summer": "Zomer",
+    "winter": "Winter",
+    "entity": "CA350/550 climate-entiteit (verplicht)",
+    "animation": "Animatie",
+    "animation_speed_source": "Snelheidsbron",
+    "animation_speed": "Vaste snelheid (%)",
+    "color_scale": "Kleurenschaal",
+    "temp_min": "Vaste schaal - min (°C)",
+    "temp_max": "Vaste schaal - max (°C)",
+    "show_legend": "Temperatuurschaal tonen",
+    "name": "Naam (optioneel)",
+    "tempSensor1": "Buitentemperatuur",
+    "tempSensor2": "Afvoertemperatuur",
+    "tempSensor3": "Retourtemperatuur",
+    "tempSensor4": "Toevoertemperatuur",
+    "filterstatus": "Filterstatus",
+    "bypass_valve": "Bypassklep",
+    "summer_mode": "Zomermodus",
+    "preheat_field": "Voorverwarmingsregister",
+    "fan_speed_supply": "Toevoerventilatorsnelheid",
+    "fan_speed_exhaust": "Afvoerventilatorsnelheid",
+    "return_air_level": "Retourluchtstand",
+    "supply_air_level": "Toevoerluchtstand",
+    "animated": "Geanimeerd (luchtstromen + ventilatoren)",
+    "static": "Statisch",
+    "level": "Op basis van luchtdebiet (toevoer/retour %)",
+    "auto_scale": "Auto (huidige waarden)",
+    "fixed_scale": "Vast (handmatig bereik)",
+    "low": "Stand 1",
+    "medium": "Stand 2",
+    "high": "Stand 3",
+    "language": "Taal",
+    "auto": "Automatisch (Home Assistant)"
+  },
   "nb": {"invalid_config": "Ikke gyldig konfigurasjon", "no_entity": "Ingen climate-enhet valgt", "detected": "enheter funnet", "advanced": "Avansert / manuell tilordning"},
   "de": {
     "invalid_config": "Ungültige Konfiguration",
@@ -184,4 +242,12 @@ export function resolveLanguage(language?: string, hassLanguage?: string): strin
 
 export function localize(key: string, language?: string): string {
   return STRINGS[resolveLanguage(language)][key] ?? STRINGS.en[key] ?? key;
+}
+
+/** Shared display labels; fan service values stay unchanged. */
+export function fanModeLabel(mode: string | undefined, language?: string): string {
+  const normalized = (mode ?? 'off').toLowerCase();
+  return ['off', 'low', 'medium', 'high'].includes(normalized)
+    ? localize(normalized, language)
+    : mode ?? 'off';
 }

@@ -39,7 +39,7 @@ export class MqttComfoairCardEditor extends LitElement implements LovelaceCardEd
     const cfg = this._config;
     const t = (key: string): string => localize(key, resolveLanguage(cfg.language, this.hass?.language));
     const schema: FormSchema[] = [
-      { name: 'language', selector: { select: { options: ['auto', 'en', 'pl', 'de'].map(value => ({ value, label: value === 'auto' ? t('auto') : ({en:'English', pl:'Polski', de:'Deutsch'}[value] || value) })) } } },
+      { name: 'language', selector: { select: { options: ['auto', 'en', 'pl', 'de', 'nl'].map(value => ({ value, label: value === 'auto' ? t('auto') : ({en:'English', pl:'Polski', de:'Deutsch', nl:'Nederlands'}[value] || value) })) } } },
       { name: 'entity', required: true, selector: { entity: { domain: 'climate' } } },
       { name: 'animation', selector: { select: { options: [
         { value: 'animated', label: t('animated') },

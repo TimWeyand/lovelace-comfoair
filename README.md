@@ -1,6 +1,6 @@
-## English and Polish localization (fork)
+## Localization and number formatting (fork)
 
-This fork adds complete **English**, **Polish**, and **German** translations for the card,
+This fork provides complete **English**, **Polish**, **German**, and **Dutch** translations for the card,
 status indicators, accessible button labels, tooltips, and visual configuration editor.
 Existing Norwegian messages remain available; missing translations fall back to English.
 
@@ -9,15 +9,26 @@ The language defaults to the Home Assistant user language. You can override it p
 ```yaml
 type: custom:mqttcomfoair-card
 entity: climate.your_ventilation
-language: pl  # auto (default), en, pl, de
+language: pl  # auto (default), en, pl, de, nl
 ```
 
 Choose **Language / Język** in the visual editor. `auto` follows language changes in Home
-Assistant without requiring sensor updates. Temperatures use locale-specific decimal
-separators and at most one decimal place. Entity IDs, fan modes, and service calls remain
-unchanged. Install this fork instead of the upstream JavaScript resource, since both
+Assistant without requiring sensor updates. Temperature, fan RPM and percentage values
+follow the **number format** selected in the Home Assistant profile, independently of the card language.
+The formatter preserves the original precision and does not add thousands separators.
+Supported formats include language, system, comma_decimal, decimal_comma, space_comma,
+quote_decimal and none. Without locale information, it keeps the original comma fallback.
+Entity IDs, fan modes, and service calls remain unchanged.
+Install this fork instead of the upstream JavaScript resource, since both
 register the same custom element. After replacing the resource, reset the Companion app
 frontend cache if old labels or configuration errors remain.
+
+This implementation consolidates the English localization covered by
+[upstream PR #3](https://github.com/TimWeyand/lovelace-comfoair/pull/3),
+adapts the Dutch translations from [PR #4](https://github.com/TimWeyand/lovelace-comfoair/pull/4),
+and incorporates the number-format helpers and regression tests from
+[PR #5](https://github.com/TimWeyand/lovelace-comfoair/pull/5), while keeping Polish and
+per-card language selection in the same localization system.
 
 ---
 

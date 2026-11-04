@@ -7,8 +7,9 @@ import { CARD_TYPE, EDITOR_TYPE, CARD_VERSION, FAN_BUTTONS, ENTITY_FIELDS } from
 import {
   getState, displayState, numState, isFanModeActive, clampTemperature, autodetectEntities,
   tempDomain, tempColor, rampColor, recoveryPct, statusChip, animSpeedFactor,
+  decimalSeparator, formatDecimal,
 } from './helpers';
-import { localize, resolveLanguage } from './localize';
+import { fanModeLabel, localize, resolveLanguage } from './localize';
 
 console.info(
   `%c MQTT-COMFOAIR-CARD %c ${CARD_VERSION} `,
@@ -71,7 +72,7 @@ export class MqttComfoairCard extends LitElement implements LovelaceCard {
   protected shouldUpdate(changed: PropertyValues): boolean {
     if (changed.has('_config')) return true;
     const old = changed.get('hass') as HomeAssistant | undefined;
-    if (!old || !this._config || old.language !== this.hass.language) return true;
+    if (!old || !this._config || old.language !== this.hass.language || old.locale !== this.hass.locale) return true;
     const cfg = this._config as unknown as Record<string, string | undefined>;
     const ids = ENTITY_FIELDS.map((f) => cfg[f]).filter((x): x is string => !!x);
     return ids.some((id) => old.states[id] !== this.hass.states[id]);
@@ -129,10 +130,8 @@ export class MqttComfoairCard extends LitElement implements LovelaceCard {
       statusChip('season', getState(h, cfg.summer_mode)?.state, undefined, language),
     ];
 
-    const fmt = (s: string): string => {
-      const value = Number(s);
-      return s.trim() && Number.isFinite(value) ? new Intl.NumberFormat(language, { maximumFractionDigits: 1 }).format(value) : s;
-    };
+    const separator = decimalSeparator(this.hass.locale, this.hass.language);
+    const fmt = (s: string): string => formatDecimal(s, separator);
     const tempBadge = (color: string, entityId?: string): TemplateResult => {
       const stl = `--fg:${color};--bd:color-mix(in srgb, ${color} 45%, transparent);--bg:color-mix(in srgb, ${color} 14%, transparent)`;
       return html`<div class="tempbadge ${entityId ? 'clickable' : ''}" style=${stl} @click=${(): void => this._moreInfo(entityId)} title=${entityId ? t('history') : ''}><span class="v">${fmt(displayState(h, entityId))}</span><span class="u">°C</span></div>`;
@@ -143,11 +142,11 @@ export class MqttComfoairCard extends LitElement implements LovelaceCard {
       const dur = SPIN_BASE / factor;
       return html`<div class="subt ${entityId ? 'clickable' : ''}" @click=${(): void => this._moreInfo(entityId)}>
         <ha-icon class=${spin ? 'spinico spin' : 'spinico'} style=${spin ? `animation-duration:${dur.toFixed(2)}s` : ''} icon="mdi:fan"></ha-icon>
-        <span>${displayState(h, entityId)}</span>&nbsp;rpm
+        <span>${fmt(displayState(h, entityId))}</span>&nbsp;rpm
       </div>`;
     };
     const subPct = (entityId?: string): TemplateResult => html`<div class="subt ${entityId ? 'clickable' : ''}" @click=${(): void => this._moreInfo(entityId)}>
-        <ha-icon icon="mdi:gauge"></ha-icon><span>${displayState(h, entityId)}</span>&nbsp;%
+        <ha-icon icon="mdi:gauge"></ha-icon><span>${fmt(displayState(h, entityId))}</span>&nbsp;%
       </div>`;
     const lbl = (icon: string, text: string, rev = false): TemplateResult =>
       html`<div class="lbl ${rev ? 'rev' : ''}"><ha-icon icon=${icon}></ha-icon>${text}</div>`;
@@ -163,7 +162,7 @@ export class MqttComfoairCard extends LitElement implements LovelaceCard {
           ${FAN_BUTTONS.map(
             (b) => html`<button
               class=${isFanModeActive(fanMode, b.mode) ? 'on' : ''}
-              title=${t(b.mode)} aria-label=${t(b.mode)}
+              title=${fanModeLabel(b.mode, language)} aria-label=${fanModeLabel(b.mode, language)}
               @click=${(): void => this._setFan(b.mode)}
             ><ha-icon icon=${b.icon}></ha-icon></button>`,
           )}
@@ -176,7 +175,7 @@ export class MqttComfoairCard extends LitElement implements LovelaceCard {
           <div class="ic"><ha-icon icon="mdi:hvac"></ha-icon></div>
           <div>
             <div class="ttl">${cfg.name || t('title')}</div>
-            <div class="st"><span class="dot ${running ? 'live' : ''}"></span><span>${fanModeLc ? ((['off', 'low', 'medium', 'high'].includes(fanModeLc) ? t(fanModeLc) : fanMode)) : '—'}</span></div>
+            <div class="st"><span class="dot ${running ? 'live' : ''}"></span><span>${fanModeLc ? fanModeLabel(fanMode, language) : '—'}</span></div>
           </div>
           <div class="grow"></div>
           <div class="recov">
